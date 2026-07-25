@@ -8,7 +8,7 @@ theme: null
 
 # Se pubblichi come Project Page (https://tuonome.github.io/nome-repo/)
 # invece che come sito utente/organizzazione, scommenta e imposta:
-# baseurl: "/nome-repo"
+baseurl: "/paolerta"
 
 exclude:
   - README.md
