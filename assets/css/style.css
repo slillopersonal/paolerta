@@ -1,0 +1,603 @@
+/* ==========================================================================
+   LA MAPPA DEL MALANDRINO — stile pergamena / ceralacca
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Dancing+Script:wght@600&display=swap');
+
+:root {
+  /* palette */
+  --parchment-light: #f1e6c8;
+  --parchment: #e6d5a8;
+  --parchment-dark: #d3bd8a;
+  --parchment-edge: #b89b64;
+  --ink: #2b1c10;
+  --ink-soft: #4a3520;
+  --wax: #7c1f2b;
+  --wax-dark: #5c141d;
+  --gold: #9c7a2e;
+  --gold-bright: #c9a13b;
+  --shadow: rgba(30, 18, 8, 0.45);
+
+  --font-display: 'Pirata One', 'Cinzel Decorative', serif;
+  --font-body: 'IM Fell English', Georgia, serif;
+  --font-label: 'IM Fell English SC', 'IM Fell English', serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse at 20% 15%, rgba(255,255,255,0.10), transparent 55%),
+    radial-gradient(ellipse at 80% 85%, rgba(0,0,0,0.12), transparent 55%),
+    repeating-linear-gradient(45deg, rgba(120,90,40,0.03) 0 2px, transparent 2px 6px),
+    linear-gradient(160deg, #7a6338 0%, #5c4a29 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(16px, 5vw, 48px) 14px 60px;
+  line-height: 1.5;
+}
+
+/* subtle vignette overlay for the whole page */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.35) 100%);
+  z-index: 0;
+}
+
+/* ==========================================================================
+   MAPPA — the parchment card
+   ========================================================================== */
+
+.mappa {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 560px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.25), transparent 45%),
+    radial-gradient(circle at 75% 80%, rgba(120,90,40,0.18), transparent 50%),
+    linear-gradient(135deg, var(--parchment-light), var(--parchment) 55%, var(--parchment-dark));
+  border-radius: 6px;
+  box-shadow:
+    0 25px 60px var(--shadow),
+    inset 0 0 60px rgba(120, 90, 40, 0.25),
+    inset 0 0 0 1px rgba(120, 90, 40, 0.35);
+  padding: clamp(22px, 6vw, 44px) clamp(20px, 7vw, 48px) clamp(28px, 6vw, 46px);
+  transform: rotate(-0.4deg);
+}
+
+.mappa::after {
+  /* burnt / deckled edge illusion */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 10px rgba(90, 65, 30, 0.06);
+  pointer-events: none;
+}
+
+.mappa__eyebrow {
+  font-family: var(--font-label);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: clamp(0.75rem, 2.2vw, 0.88rem);
+  color: var(--wax);
+  text-align: center;
+  margin: 0 0 6px;
+  opacity: 0.85;
+}
+
+.mappa__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-align: center;
+  font-size: clamp(1.7rem, 7vw, 2.5rem);
+  color: var(--ink);
+  margin: 0 0 4px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.mappa__motto {
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: clamp(0.95rem, 3vw, 1.05rem);
+  margin: 0 0 18px;
+  opacity: 0.9;
+}
+
+.mappa__divider {
+  border: none;
+  height: 1px;
+  margin: 18px auto;
+  width: 70%;
+  background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+  opacity: 0.6;
+}
+
+/* footprints signature motif, "corridor walk" version.
+   Three invisible STRAIGHT corridors cross the page (0%/100% transform
+   only — never a curve). Each corridor carries exactly ONE pair of
+   footprints (.foot--left / .foot--right) that actually TRAVELS the
+   full corridor: the shared corridor-*-move keyframes move+rotate the
+   pair together, using a stepped timing function (steps(N, jump-none))
+   so the motion is a series of discrete strides, not a glide. The
+   right foot's move animation starts half a stride later than the
+   left foot's (see the animation-delay pairs in foottrail.html), which
+   is what makes them alternate like an actual gait instead of sliding
+   in lockstep. Each foot is offset a few px sideways from the
+   corridor's centre line, in its own local (already-rotated) space via
+   the nested .foot__mark, so the pair reads as two feet close
+   together, not one mark. Opacity is a separate, linearly-eased
+   animation of the same duration, so the fade in/out at each end of
+   the corridor stays smooth even though the movement is stepped. The
+   name label shares the corridor-move keyframes and the LEFT foot's
+   delay, so it always walks right along with the one visible pair —
+   name + footprint shape (see .foot__mark--l/s/d below) are picked at
+   random by app.js from _data/camminatori.json every time the
+   corridor loops. */
+.foottrail {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.foot,
+.foot-name {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* shape comes from an inline SVG silhouette (real foot/paw outline,
+   not a plain blob), recoloured to ink via the same sepia filter used
+   everywhere else on the trail. Which silhouette + size is picked by
+   app.js from each entry's "tipo" in _data/camminatori.json:
+   l = piede grande, s = piedino, d = zampa di cane. */
+.foot__mark {
+  display: block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: sepia(1) saturate(2.4) brightness(0.5) hue-rotate(-8deg);
+}
+
+.foot__mark--l,
+.foot__mark--s-foot {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 76 76'%3E%3Cpath fill='%23000' d='M 44.5,18.5C 45.8807,18.5 47,20.2909 47,22.5C 47,24.7091 45.8807,26.5 44.5,26.5C 43.1193,26.5 42,24.7091 42,22.5C 42,20.2909 43.1193,18.5 44.5,18.5 Z M 39.25,19.75C 40.0784,19.75 40.75,20.8693 40.75,22.25C 40.75,23.6307 40.0784,24.75 39.25,24.75C 38.4216,24.75 37.75,23.6307 37.75,22.25C 37.75,20.8693 38.4216,19.75 39.25,19.75 Z M 35,21C 35.8284,21 36.5,21.8954 36.5,23C 36.5,24.1046 35.8284,25 35,25C 34.1716,25 33.5,24.1046 33.5,23C 33.5,21.8954 34.1716,21 35,21 Z M 31.5,23.25C 32.3284,23.25 33,24.1454 33,25.25C 33,26.3546 32.3284,27.25 31.5,27.25C 30.6716,27.25 30,26.3546 30,25.25C 30,24.1454 30.6716,23.25 31.5,23.25 Z M 28.75,26.75C 29.3023,26.75 29.75,27.4216 29.75,28.25C 29.75,29.0784 29.3023,29.75 28.75,29.75C 28.1977,29.75 27.75,29.0784 27.75,28.25C 27.75,27.4216 28.1977,26.75 28.75,26.75 Z M 34,27.5C 43,23 49.2428,31.3086 42,40C 37,46 51.1334,55.5428 42,57.5C 35,59 37.1925,49.8978 35,46C 26,30 34,27.5 34,27.5 Z '/%3E%3C/svg%3E");
+}
+
+.foot__mark--l {
+  width: clamp(38px, 7.4vw, 46px);
+  height: clamp(38px, 7.4vw, 46px);
+}
+
+/* "s" = un bimbo che gattona: mani davanti (questa classe)... */
+.foot__mark--s {
+  width: clamp(10px, 2vw, 13px);
+  height: clamp(10px, 2vw, 13px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3Cpath d='M352 96C352 78.3 337.7 64 320 64C302.3 64 288 78.3 288 96L288 304C288 312.8 280.8 320 272 320C263.2 320 256 312.8 256 304L256 128C256 110.3 241.7 96 224 96C206.3 96 192 110.3 192 128L192 400C192 401.5 192 403.1 192.1 404.6L131.6 347C115.6 331.8 90.3 332.4 75 348.4C59.7 364.4 60.4 389.7 76.4 405L188.8 512C231.9 553.1 289.2 576 348.8 576L368 576C465.2 576 544 497.2 544 400L544 192C544 174.3 529.7 160 512 160C494.3 160 480 174.3 480 192L480 304C480 312.8 472.8 320 464 320C455.2 320 448 312.8 448 304L448 128C448 110.3 433.7 96 416 96C398.3 96 384 110.3 384 128L384 304C384 312.8 376.8 320 368 320C359.2 320 352 312.8 352 304L352 96z'/%3E%3C/svg%3E");
+}
+
+/* ...e piedini dietro (piccoli, stessa sagoma del piede grande) */
+.foot__mark--s-foot {
+  width: clamp(26px, 5vw, 30px);
+  height: clamp(26px, 5vw, 30px);
+}
+
+.foot__mark--d {
+  width: clamp(16px, 3.2vw, 20px);
+  height: clamp(16px, 3.2vw, 20px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3Cpath d='M298.5 156.9C312.8 199.8 298.2 243.1 265.9 253.7C233.6 264.3 195.8 238.1 181.5 195.2C167.2 152.3 181.8 109 214.1 98.4C246.4 87.8 284.2 114 298.5 156.9zM164.4 262.6C183.3 295 178.7 332.7 154.2 346.7C129.7 360.7 94.5 345.8 75.7 313.4C56.9 281 61.4 243.3 85.9 229.3C110.4 215.3 145.6 230.2 164.4 262.6zM133.2 465.2C185.6 323.9 278.7 288 320 288C361.3 288 454.4 323.9 506.8 465.2C510.4 474.9 512 485.3 512 495.7L512 497.3C512 523.1 491.1 544 465.3 544C453.8 544 442.4 542.6 431.3 539.8L343.3 517.8C328 514 312 514 296.7 517.8L208.7 539.8C197.6 542.6 186.2 544 174.7 544C148.9 544 128 523.1 128 497.3L128 495.7C128 485.3 129.6 474.9 133.2 465.2zM485.8 346.7C461.3 332.7 456.7 295 475.6 262.6C494.5 230.2 529.6 215.3 554.1 229.3C578.6 243.3 583.2 281 564.3 313.4C545.4 345.8 510.3 360.7 485.8 346.7zM374.1 253.7C341.8 243.1 327.2 199.8 341.5 156.9C355.8 114 393.6 87.8 425.9 98.4C458.2 109 472.8 152.3 458.5 195.2C444.2 238.1 406.4 264.3 374.1 253.7z'/%3E%3C/svg%3E");
+}
+
+/* sideways offset from the corridor's centre line, plus a slight
+   toe-out, applied in the foot's own local space (already rotated to
+   the corridor's heading by the parent's animated transform). The
+   "d" (dog) type additionally uses a second, hind pair — .foot--back —
+   offset further along the direction of travel, so a quadruped shows
+   4 paw prints (front + hind) instead of 2. For "l"/"s" the hind pair
+   is simply left without a foot__mark--l/s/d class by app.js, so it
+   has no background-image and stays invisible. */
+.foot--left:not(.foot--back) .foot__mark  { transform: translate(-8px, 0) rotate(-9deg); }
+/* the source artwork is a LEFT foot, so mirror it for the right foot
+   (scaleX after the rotate, so it flips the art itself without
+   cancelling the outward toe-out lean set up by the rotation) */
+.foot--right:not(.foot--back) .foot__mark { transform: translate(8px, 0) rotate(9deg) scaleX(-1); }
+
+/* the hand artwork has its thumb on the LEFT — opposite of the foot's
+   big toe — so for two hands set down with thumbs pointing inward
+   (toward each other, like real crawling) the mirroring is reversed:
+   mirror the LEFT hand, leave the RIGHT hand as drawn. */
+.foot--left:not(.foot--back) .foot__mark--s  { transform: translate(-8px, 0) rotate(-9deg) scaleX(-1); }
+.foot--right:not(.foot--back) .foot__mark--s { transform: translate(8px, 0) rotate(9deg); }
+
+.foot--left.foot--back .foot__mark  { transform: translate(-8px, 30px) rotate(-9deg); }
+.foot--right.foot--back .foot__mark { transform: translate(8px, 30px) rotate(9deg) scaleX(-1); }
+
+/* "d" paws are wide enough at ±8px that left/right slightly overlap;
+   give them a bit more sideways room, front and back */
+.foot--left:not(.foot--back) .foot__mark--d  { transform: translate(-13px, 0) rotate(-9deg); }
+.foot--right:not(.foot--back) .foot__mark--d { transform: translate(13px, 0) rotate(9deg) scaleX(-1); }
+.foot--left.foot--back .foot__mark--d  { transform: translate(-13px, 30px) rotate(-9deg); }
+.foot--right.foot--back .foot__mark--d { transform: translate(13px, 30px) rotate(9deg) scaleX(-1); }
+
+/* centred above the whole footprint group (not offset toward any one
+   mark), so it reads as the name of "whoever left these prints" and
+   not as glued to a single foot */
+.foot-name__text {
+  display: inline-block;
+  transform: translate(-50%, -28px) rotate(-4deg);
+  font-family: 'Dancing Script', var(--font-body);
+  font-weight: 600;
+  font-size: clamp(16px, 2.9vw, 21px);
+  color: var(--wax);
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+
+@keyframes step-fade {
+  0%   { opacity: 0; }
+  10%  { opacity: .65; }
+  90%  { opacity: .65; }
+  100% { opacity: 0; }
+}
+
+@keyframes step-fade-name {
+  0%   { opacity: 0; }
+  10%  { opacity: .9; }
+  90%  { opacity: .9; }
+  100% { opacity: 0; }
+}
+
+/* corridor A: diagonal, lower-left to upper-right */
+@keyframes corridor-a-move {
+  0%   { transform: translate(-8vw, 88vh) rotate(40deg); }
+  100% { transform: translate(108vw, 10vh) rotate(40deg); }
+}
+
+/* corridor B: diagonal, upper-right to lower-left */
+@keyframes corridor-b-move {
+  0%   { transform: translate(108vw, 24vh) rotate(260deg); }
+  100% { transform: translate(-8vw, 46vh) rotate(260deg); }
+}
+
+/* corridor C: near-vertical, top to bottom */
+@keyframes corridor-c-move {
+  0%   { transform: translate(35vw, -8vh) rotate(165deg); }
+  100% { transform: translate(62vw, 108vh) rotate(165deg); }
+}
+
+/* --stepcount lets app.js shorten the stride for a "s" (piedino) walker
+   without touching duration/heading: more, smaller steps over the same
+   corridor in the same time = a shorter, more tentative gait. Falls
+   back to each corridor's normal stride count when unset. */
+.trail--a .foot      { animation: corridor-a-move 10s steps(var(--stepcount, 36), jump-none) infinite, step-fade 10s linear infinite; }
+.trail--a .foot-name { animation: corridor-a-move 10s steps(var(--stepcount, 36), jump-none) infinite, step-fade-name 10s linear infinite; }
+
+.trail--b .foot      { animation: corridor-b-move 8s steps(var(--stepcount, 26), jump-none) infinite, step-fade 8s linear infinite; }
+.trail--b .foot-name { animation: corridor-b-move 8s steps(var(--stepcount, 26), jump-none) infinite, step-fade-name 8s linear infinite; }
+
+.trail--c .foot      { animation: corridor-c-move 11s steps(var(--stepcount, 40), jump-none) infinite, step-fade 11s linear infinite; }
+.trail--c .foot-name { animation: corridor-c-move 11s steps(var(--stepcount, 40), jump-none) infinite, step-fade-name 11s linear infinite; }
+
+/* ==========================================================================
+   SEAL — tap to break the wax seal and reveal the content
+   ========================================================================== */
+
+.seal-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 30px 0 10px;
+}
+
+.seal-hint {
+  font-family: var(--font-label);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  opacity: 0.75;
+  text-align: center;
+}
+
+.seal {
+  --size: 112px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  background: none;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.seal:hover { transform: scale(1.04); }
+.seal:active { transform: scale(0.96); }
+.seal:focus-visible { outline: 3px solid var(--gold-bright); outline-offset: 6px; }
+
+/* soft magical glow that escapes once the wax cracks open */
+.seal__glow {
+  position: absolute;
+  inset: -30%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 221, 150, 0.9), rgba(255, 221, 150, 0) 65%);
+  opacity: 0;
+  transform: scale(0.4);
+  pointer-events: none;
+}
+
+/* the two wax halves — together they form the intact seal */
+.seal__half {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 35% 30%, #a52f3d, var(--wax) 55%, var(--wax-dark) 100%);
+  box-shadow:
+    0 8px 18px rgba(0,0,0,0.45),
+    inset 0 2px 4px rgba(255,255,255,0.25),
+    inset 0 -6px 12px rgba(0,0,0,0.35);
+}
+
+.seal__half svg {
+  position: absolute;
+  width: 54%;
+  height: 54%;
+  top: 23%;
+  left: 23%;
+  color: rgba(255, 231, 190, 0.9);
+}
+
+.seal__half--left  { clip-path: inset(0 50% 0 0); }
+.seal__half--right { clip-path: inset(0 0 0 50%); }
+
+/* crack line, flashes on the moment of impact, just before the split */
+.seal__crack {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.seal__crack svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 1px rgba(255, 221, 150, 0.6));
+}
+
+/* small wax crumbs that pop off and fall as the seal breaks */
+.seal__crumbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.crumb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--wax);
+  box-shadow: inset -1px -1px 1px rgba(0,0,0,0.4);
+  opacity: 0;
+}
+
+/* ---- the sequence, triggered by JS toggling classes on .seal ---- */
+
+.seal.is-cracking {
+  animation: sealShake 0.22s ease;
+}
+
+.seal.is-cracking .seal__crack {
+  animation: crackFlash 0.22s ease forwards;
+}
+
+.seal.is-broken { pointer-events: none; }
+
+.seal.is-broken .seal__crack {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.seal.is-broken .seal__glow {
+  animation: glowBurst 0.9s ease forwards;
+}
+
+.seal.is-broken .seal__half--left {
+  animation: splitLeft 0.7s cubic-bezier(.25,.7,.4,1) forwards;
+}
+
+.seal.is-broken .seal__half--right {
+  animation: splitRight 0.7s cubic-bezier(.25,.7,.4,1) forwards;
+}
+
+.seal.is-broken .crumb { animation: crumbFall 0.8s ease-out forwards; }
+.seal.is-broken .crumb:nth-child(1) { animation-delay: 0.02s; --tx: -30px; --ty: 46px; --rot: -140deg; }
+.seal.is-broken .crumb:nth-child(2) { animation-delay: 0.05s; --tx: 18px;  --ty: 52px; --rot: 120deg; }
+.seal.is-broken .crumb:nth-child(3) { animation-delay: 0s;    --tx: -44px; --ty: 12px; --rot: -80deg; }
+.seal.is-broken .crumb:nth-child(4) { animation-delay: 0.08s; --tx: 42px;  --ty: 20px; --rot: 100deg; }
+.seal.is-broken .crumb:nth-child(5) { animation-delay: 0.03s; --tx: -10px; --ty: 58px; --rot: -160deg; }
+.seal.is-broken .crumb:nth-child(6) { animation-delay: 0.06s; --tx: 8px;   --ty: 60px; --rot: 150deg; }
+
+@keyframes sealShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px) rotate(-1deg); }
+  50% { transform: translateX(3px) rotate(1deg); }
+  75% { transform: translateX(-2px); }
+}
+
+@keyframes crackFlash {
+  0%   { opacity: 0; }
+  60%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+@keyframes glowBurst {
+  0%   { opacity: 0; transform: scale(0.4); }
+  35%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+
+@keyframes splitLeft {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-60%, 30%) rotate(-35deg); opacity: 0; }
+}
+
+@keyframes splitRight {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(60%, 30%) rotate(35deg); opacity: 0; }
+}
+
+@keyframes crumbFall {
+  0%   { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); }
+}
+
+/* ==========================================================================
+   CONTENT — revealed after the seal breaks
+   ========================================================================== */
+
+.content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.content.is-visible {
+  max-height: none;
+  overflow: visible;
+  opacity: 1;
+}
+
+.content__intro {
+  font-family: var(--font-label);
+  font-size: clamp(1rem, 3.4vw, 1.15rem);
+  color: var(--wax);
+  text-align: center;
+  margin: 4px 0 14px;
+  letter-spacing: 0.03em;
+}
+
+.content p {
+  font-size: clamp(1.02rem, 3.6vw, 1.18rem);
+  margin: 0 0 16px;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: inkIn 0.6s ease forwards;
+}
+
+.content.is-visible p { animation-play-state: running; }
+
+@keyframes inkIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mission-box,
+.destination-box {
+  margin-top: 22px;
+  padding: 16px 18px;
+  border-radius: 4px;
+  background: rgba(124, 31, 43, 0.07);
+  border: 1px solid rgba(124, 31, 43, 0.28);
+  position: relative;
+}
+
+.mission-box__label,
+.destination-box__label {
+  font-family: var(--font-label);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wax);
+  margin: 0 0 8px;
+}
+
+.mission-box p,
+.destination-box p {
+  margin: 0 0 8px;
+  font-size: clamp(0.98rem, 3.4vw, 1.08rem);
+}
+
+.mission-box p:last-child,
+.destination-box p:last-child { margin-bottom: 0; }
+
+.destination-box {
+  margin-top: 14px;
+  background: rgba(156, 122, 46, 0.1);
+  border-color: rgba(156, 122, 46, 0.35);
+}
+
+.destination-box__label { color: var(--gold); }
+
+.footer-note {
+  margin-top: 26px;
+  text-align: center;
+  font-style: italic;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  opacity: 0.75;
+}
+
+/* error state if the json can't be read */
+.error-box {
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.error-box p { margin: 0 0 6px; }
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .foot,
+  .foot-name,
+  .content p,
+  .seal.is-cracking,
+  .seal.is-cracking .seal__crack,
+  .seal.is-broken .seal__glow,
+  .seal.is-broken .seal__half--left,
+  .seal.is-broken .seal__half--right,
+  .seal.is-broken .crumb {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .foottrail { display: none; }
+
+  .seal.is-broken .seal__half--left,
+  .seal.is-broken .seal__half--right {
+    opacity: 0 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .seal { --size: 92px; }
+}

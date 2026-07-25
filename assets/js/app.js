@@ -1,0 +1,147 @@
+/**
+ * app.js — logica condivisa per tutte le pagine della Mappa del Malandrino.
+ *
+ * Con Jekyll il contenuto di ogni tappa è già presente nell'HTML generato
+ * in fase di build (a partire dal front matter della singola pagina), quindi
+ * qui non serve più alcun fetch: resta solo l'interazione del sigillo.
+ */
+
+(function () {
+  "use strict";
+
+  document.addEventListener("DOMContentLoaded", setupSeal);
+  document.addEventListener("DOMContentLoaded", setupFoottrail);
+
+  function setupSeal() {
+    var seal = document.getElementById("seal");
+    var content = document.getElementById("content");
+    var sealWrap = document.getElementById("sealWrap");
+    if (!seal || !content) return;
+
+    var reduceMotion = window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    seal.addEventListener("click", function onBreak() {
+      seal.removeEventListener("click", onBreak);
+      seal.setAttribute("aria-pressed", "true");
+
+      if (reduceMotion) {
+        seal.classList.add("is-broken");
+        content.classList.add("is-visible");
+        if (sealWrap) sealWrap.style.display = "none";
+        return;
+      }
+
+      // 1) la ceralacca si crepa sotto pressione
+      seal.classList.add("is-cracking");
+
+      // 2) un attimo dopo si spacca davvero in due e il messaggio appare
+      setTimeout(function () {
+        seal.classList.remove("is-cracking");
+        seal.classList.add("is-broken");
+        content.classList.add("is-visible");
+      }, 220);
+
+      // 3) a detriti posati, il sigillo esce dal flusso
+      setTimeout(function () {
+        if (sealWrap) sealWrap.style.display = "none";
+      }, 1000);
+    });
+  }
+
+  function setupFoottrail() {
+    var camminatori = window.CAMMINATORI || [];
+    var trails = document.querySelectorAll(".trail");
+    if (!camminatori.length || !trails.length) return;
+
+    // durata (s) e numero di passi "normale" di ciascun corridoio: deve
+    // combaciare con l'animation-duration e lo steps(..., N) di fallback
+    // in style.css per ogni .trail--X
+    var DURATIONS = { a: 10, b: 8, c: 11 };
+    var BASE_STEPS = { a: 36, b: 26, c: 40 };
+    // ritardo "di base" (s) di ciascun corridoio, quello con cui la
+    // sequenza di quel trail è sfalsata dalle altre due (vedi i valori
+    // -3s/-6s inline in foottrail.html)
+    var BASE_DELAY = { a: 0, b: -3, c: -6 };
+    // "s" (piedino) fa più passi, più corti, sullo stesso corridoio:
+    // un'andatura più incerta invece di una falcata lunga e sicura
+    var SMALL_STEP_MULTIPLIER = 2.3;
+
+    // nome attualmente mostrato per ciascun corridoio (data-trail),
+    // così da non pescarne mai uno già in uso da un altro corridoio
+    var current = {};
+
+    trails.forEach(function (trail) {
+      var id = trail.getAttribute("data-trail");
+      var nameEl = trail.querySelector(".foot-name__text");
+      var syncEl = trail.querySelector(".foot-name");
+      var frontMarks = trail.querySelectorAll(".foot:not(.foot--back) .foot__mark");
+      var backMarks = trail.querySelectorAll(".foot--back .foot__mark");
+      var feet = trail.querySelectorAll(".foot");
+
+      assign(id, nameEl, frontMarks, backMarks, feet);
+      if (syncEl) {
+        syncEl.addEventListener("animationiteration", function () {
+          assign(id, nameEl, frontMarks, backMarks, feet);
+        });
+      }
+    });
+
+    function assign(id, nameEl, frontMarks, backMarks, feet) {
+      var others = Object.keys(current)
+        .filter(function (k) { return k !== id; })
+        .map(function (k) { return current[k]; });
+
+      var candidates = camminatori.filter(function (c) {
+        return others.indexOf(c.nome) === -1;
+      });
+      if (!candidates.length) candidates = camminatori;
+
+      var previous = current[id];
+      var pick = candidates[Math.floor(Math.random() * candidates.length)];
+      if (candidates.length > 1) {
+        while (pick.nome === previous) {
+          pick = candidates[Math.floor(Math.random() * candidates.length)];
+        }
+      }
+
+      current[id] = pick.nome;
+      if (nameEl) nameEl.textContent = pick.nome;
+
+      var tipo = pick.tipo || "l";
+      frontMarks.forEach(function (mark) {
+        mark.classList.remove("foot__mark--l", "foot__mark--s", "foot__mark--d");
+        mark.classList.add("foot__mark--" + tipo);
+      });
+      // "d" (quadrupede) e "s" (bimbo che gattona) mostrano anche la
+      // coppia posteriore — zampe per "d", piedini per "s"; per "l"
+      // restano senza classe, quindi invisibili
+      backMarks.forEach(function (mark) {
+        mark.classList.remove("foot__mark--l", "foot__mark--s-foot", "foot__mark--d");
+        if (tipo === "d") mark.classList.add("foot__mark--d");
+        else if (tipo === "s") mark.classList.add("foot__mark--s-foot");
+      });
+
+      var duration = DURATIONS[id] || 10;
+      var steps = BASE_STEPS[id] || 30;
+      if (tipo === "s") steps = Math.round(steps * SMALL_STEP_MULTIPLIER);
+      var baseDelay = BASE_DELAY[id] || 0;
+      // metà di un passo: è questo scarto tra sinistra e destra che fa
+      // leggere l'andatura come alternata invece che sincronizzata, e va
+      // ricalcolato ogni volta che "steps" cambia (es. con "s")
+      var halfStride = duration / (2 * steps);
+
+      if (nameEl) {
+        nameEl.parentElement.style.setProperty("--stepcount", steps);
+        nameEl.parentElement.style.animationDelay = baseDelay + "s, " + baseDelay + "s";
+      }
+
+      feet.forEach(function (foot) {
+        foot.style.setProperty("--stepcount", steps);
+        var isRight = foot.classList.contains("foot--right");
+        var moveDelay = baseDelay + (isRight ? halfStride : 0);
+        foot.style.animationDelay = moveDelay + "s, " + baseDelay + "s";
+      });
+    }
+  }
+})();

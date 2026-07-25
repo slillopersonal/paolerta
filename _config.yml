@@ -1,0 +1,18 @@
+title: "La Mappa del Malandrino"
+description: "Caccia al tesoro per l'addio al celibato/nubilato"
+
+# Senza questa riga Jekyll (dalla 3.2 in poi) applica di default il tema
+# "minima": il suo assets/css/style.scss viene compilato proprio su
+# assets/css/style.css, sovrascrivendo il nostro foglio di stile custom.
+theme: null
+
+# Se pubblichi come Project Page (https://tuonome.github.io/nome-repo/)
+# invece che come sito utente/organizzazione, scommenta e imposta:
+# baseurl: "/nome-repo"
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - node_modules

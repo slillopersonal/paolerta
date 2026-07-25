@@ -1,0 +1,18 @@
+{
+  "name": "Jekyll - La Mappa del Malandrino",
+  "image": "jekyll/jekyll:latest",
+  "workspaceFolder": "/srv/jekyll",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/srv/jekyll,type=bind,consistency=cached",
+  "forwardPorts": [4000, 35729],
+  "portsAttributes": {
+    "4000": {
+      "label": "Jekyll site",
+      "onAutoForward": "openBrowser"
+    },
+    "35729": {
+      "label": "Jekyll livereload",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "bundle install"
+}
