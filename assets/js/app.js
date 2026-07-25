@@ -57,12 +57,12 @@
     // durata (s) e numero di passi "normale" di ciascun corridoio: deve
     // combaciare con l'animation-duration e lo steps(..., N) di fallback
     // in style.css per ogni .trail--X
-    var DURATIONS = { a: 10, b: 8, c: 11 };
-    var BASE_STEPS = { a: 36, b: 26, c: 40 };
+    var DURATIONS = { a: 10, b: 11 };
+    var BASE_STEPS = { a: 36, b: 40 };
     // ritardo "di base" (s) di ciascun corridoio, quello con cui la
-    // sequenza di quel trail è sfalsata dalle altre due (vedi i valori
-    // -3s/-6s inline in foottrail.html)
-    var BASE_DELAY = { a: 0, b: -3, c: -6 };
+    // sequenza di quel trail è sfalsata dall'altro (vedi il valore
+    // -5.5s inline in foottrail.html)
+    var BASE_DELAY = { a: 0, b: -5.5 };
     // "s" (piedino) fa più passi, più corti, sullo stesso corridoio:
     // un'andatura più incerta invece di una falcata lunga e sicura
     var SMALL_STEP_MULTIPLIER = 2.3;
@@ -106,7 +106,6 @@
       }
 
       current[id] = pick.nome;
-      if (nameEl) nameEl.textContent = pick.nome;
 
       var tipo = pick.tipo || "l";
       frontMarks.forEach(function (mark) {
@@ -122,6 +121,18 @@
         else if (tipo === "s") mark.classList.add("foot__mark--s-foot");
       });
 
+      // distanza dell'etichetta dal gruppo, calibrata per tipo: le
+      // orme non sono tutte della stessa taglia (l arriva a ~46px, d
+      // a ~20px, le mani di s sono ancora più piccole). Ora che sia
+      // l'orma che il testo sono correttamente centrati sul proprio
+      // punto di ancoraggio, la distanza deve coprire metà dell'orma
+      // PIÙ metà dell'altezza del testo, altrimenti si sovrappongono.
+      var NAME_LIFT = { l: "-40px", s: "-24px", d: "-27px" };
+      if (nameEl) {
+        nameEl.textContent = pick.nome;
+        nameEl.style.setProperty("--name-lift", NAME_LIFT[tipo] || "-28px");
+      }
+
       var duration = DURATIONS[id] || 10;
       var steps = BASE_STEPS[id] || 30;
       if (tipo === "s") steps = Math.round(steps * SMALL_STEP_MULTIPLIER);
@@ -133,7 +144,13 @@
 
       if (nameEl) {
         nameEl.parentElement.style.setProperty("--stepcount", steps);
-        nameEl.parentElement.style.animationDelay = baseDelay + "s, " + baseDelay + "s";
+        // a metà strada tra il ritardo del piede sinistro e quello del
+        // destro: se il nome seguisse solo il sinistro, nell'istante in
+        // cui i due piedi sono a punti diversi del passo (è così quasi
+        // sempre, è l'alternanza) il nome sembrerebbe sbilanciato verso
+        // quel lato — tanto più quanto più lungo è il passo (l/d)
+        var nameMoveDelay = baseDelay + halfStride / 2;
+        nameEl.parentElement.style.animationDelay = nameMoveDelay + "s, " + baseDelay + "s";
       }
 
       feet.forEach(function (foot) {

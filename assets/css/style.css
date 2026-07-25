@@ -2,7 +2,7 @@
    LA MAPPA DEL MALANDRINO — stile pergamena / ceralacca
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Dancing+Script:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Dancing+Script:wght@600;700&display=swap');
 
 :root {
   /* palette */
@@ -21,6 +21,15 @@
   --font-display: 'Pirata One', 'Cinzel Decorative', serif;
   --font-body: 'IM Fell English', Georgia, serif;
   --font-label: 'IM Fell English SC', 'IM Fell English', serif;
+
+  /* the card's actual rendered width — capped at 560px like .mappa's
+     own max-width, or 100vw minus the page's normal 14px side padding
+     on narrower screens, whichever is smaller */
+  --card-width: min(560px, calc(100vw - 28px));
+  /* .mappa's own left/right padding, duplicated here so the corridors
+     can sit centred inside that same margin strip — i.e. ON the
+     parchment, in from its edge, not out in the background */
+  --card-h-padding: clamp(20px, 7vw, 48px);
 }
 
 * { box-sizing: border-box; }
@@ -129,8 +138,14 @@ body::before {
 }
 
 /* footprints signature motif, "corridor walk" version.
-   Three invisible STRAIGHT corridors cross the page (0%/100% transform
-   only — never a curve). Each corridor carries exactly ONE pair of
+   Two invisible STRAIGHT VERTICAL corridors run along the left and
+   right edges of the page (0%/100% transform only — never a curve),
+   clear of the parchment card and its text. Being vertical also means
+   the name label's "ahead of the walker" offset is purely up/down on
+   screen, with no sideways drift — a diagonal corridor made that
+   offset project sideways by different amounts depending on heading,
+   which is what looked inconsistent before. Each corridor carries
+   exactly ONE pair of
    footprints (.foot--left / .foot--right) that actually TRAVELS the
    full corridor: the shared corridor-*-move keyframes move+rotate the
    pair together, using a stepped timing function (steps(N, jump-none))
@@ -162,6 +177,16 @@ body::before {
   position: absolute;
   left: 0;
   top: 0;
+  /* these wrappers must be a true zero-size POINT: they carry the
+     corridor's rotate(heading), which by default pivots around 50%/50%
+     of the element's OWN box — without width/height:0 that box is
+     whatever size the child (a 46px mark, or the name text) happens to
+     be, so the "pivot" silently sits away from the actual (0,0) anchor
+     and heading rotations other than 0deg visibly displace the result
+     (most visible at 180deg, which doubles the error instead of
+     cancelling it). */
+  width: 0;
+  height: 0;
   opacity: 0;
   will-change: transform, opacity;
 }
@@ -215,42 +240,92 @@ body::before {
    offset further along the direction of travel, so a quadruped shows
    4 paw prints (front + hind) instead of 2. For "l"/"s" the hind pair
    is simply left without a foot__mark--l/s/d class by app.js, so it
-   has no background-image and stays invisible. */
-.foot--left:not(.foot--back) .foot__mark  { transform: translate(-8px, 0) rotate(-9deg); }
+   has no background-image and stays invisible.
+
+   Every rule starts with translate(-50%, -50%): .foot__mark is a
+   normal-flow block with its own real width/height (up to 46px), so
+   without this it rests with its TOP-LEFT corner (not its centre) on
+   the corridor's anchor point — its centre sits half its own width
+   away by default. .foot-name__text already self-centres this way
+   (translate(-50%, ...)), which is exactly why the name and the marks
+   used to drift apart by ~half the mark's size instead of lining up
+   on the same corridor centre line. */
+.foot--left:not(.foot--back) .foot__mark  { transform: translate(calc(-50% - 8px), -50%) rotate(-9deg); }
 /* the source artwork is a LEFT foot, so mirror it for the right foot
    (scaleX after the rotate, so it flips the art itself without
    cancelling the outward toe-out lean set up by the rotation) */
-.foot--right:not(.foot--back) .foot__mark { transform: translate(8px, 0) rotate(9deg) scaleX(-1); }
+.foot--right:not(.foot--back) .foot__mark { transform: translate(calc(-50% + 8px), -50%) rotate(9deg) scaleX(-1); }
 
 /* the hand artwork has its thumb on the LEFT — opposite of the foot's
    big toe — so for two hands set down with thumbs pointing inward
    (toward each other, like real crawling) the mirroring is reversed:
    mirror the LEFT hand, leave the RIGHT hand as drawn. */
-.foot--left:not(.foot--back) .foot__mark--s  { transform: translate(-8px, 0) rotate(-9deg) scaleX(-1); }
-.foot--right:not(.foot--back) .foot__mark--s { transform: translate(8px, 0) rotate(9deg); }
+.foot--left:not(.foot--back) .foot__mark--s  { transform: translate(calc(-50% - 8px), -50%) rotate(-9deg) scaleX(-1); }
+.foot--right:not(.foot--back) .foot__mark--s { transform: translate(calc(-50% + 8px), -50%) rotate(9deg); }
 
-.foot--left.foot--back .foot__mark  { transform: translate(-8px, 30px) rotate(-9deg); }
-.foot--right.foot--back .foot__mark { transform: translate(8px, 30px) rotate(9deg) scaleX(-1); }
+.foot--left.foot--back .foot__mark  { transform: translate(calc(-50% - 8px), calc(-50% + 30px)) rotate(-9deg); }
+.foot--right.foot--back .foot__mark { transform: translate(calc(-50% + 8px), calc(-50% + 30px)) rotate(9deg) scaleX(-1); }
 
 /* "d" paws are wide enough at ±8px that left/right slightly overlap;
    give them a bit more sideways room, front and back */
-.foot--left:not(.foot--back) .foot__mark--d  { transform: translate(-13px, 0) rotate(-9deg); }
-.foot--right:not(.foot--back) .foot__mark--d { transform: translate(13px, 0) rotate(9deg) scaleX(-1); }
-.foot--left.foot--back .foot__mark--d  { transform: translate(-13px, 30px) rotate(-9deg); }
-.foot--right.foot--back .foot__mark--d { transform: translate(13px, 30px) rotate(9deg) scaleX(-1); }
+.foot--left:not(.foot--back) .foot__mark--d  { transform: translate(calc(-50% - 13px), -50%) rotate(-9deg); }
+.foot--right:not(.foot--back) .foot__mark--d { transform: translate(calc(-50% + 13px), -50%) rotate(9deg) scaleX(-1); }
+.foot--left.foot--back .foot__mark--d  { transform: translate(calc(-50% - 13px), calc(-50% + 30px)) rotate(-9deg); }
+.foot--right.foot--back .foot__mark--d { transform: translate(calc(-50% + 13px), calc(-50% + 30px)) rotate(9deg) scaleX(-1); }
 
 /* centred above the whole footprint group (not offset toward any one
    mark), so it reads as the name of "whoever left these prints" and
-   not as glued to a single foot */
+   not as glued to a single foot. It keeps the corridor's heading
+   rotation (like the feet), so it sits ahead of the group in the
+   direction of travel, the same way on every corridor.
+
+   --name-lift (set by app.js from the current tipo) is how far back
+   along that direction the label sits from the group's anchor. It's
+   tuned per tipo because the marks themselves are very different
+   sizes (l up to ~46px, d ~20px, s's hand+foot pair smaller still) —
+   a single fixed distance left it looking close for "l" and far for
+   "d"/"s" purely because of the icon's own size, not on purpose.
+
+   translate(-50%, calc(-50% + lift)) — the -50% on Y self-centres the
+   text on its own anchor first (same fix as the marks needed: without
+   it the box's top-left, not its centre, sits at the anchor, so the
+   text hangs downward from there by its own height and eats into the
+   marks' own space instead of clearing it). The lift is then a further
+   push from that centred position. */
 .foot-name__text {
   display: inline-block;
-  transform: translate(-50%, -28px) rotate(-4deg);
+  transform: translate(-50%, calc(-50% + var(--name-lift, -28px))) rotate(-4deg);
   font-family: 'Dancing Script', var(--font-body);
-  font-weight: 600;
-  font-size: clamp(16px, 2.9vw, 21px);
-  color: var(--wax);
-  text-shadow: 0 0 3px rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.35);
+  font-weight: 700; /* actually loaded now — the @import above only
+    fetched 600 before, so this had no visual effect until now */
+  font-size: clamp(21px, 4vw, 27px);
+  letter-spacing: 0.015em;
+  /* the corridors now run mostly over the dark body background rather
+     than the cream parchment, so a warm light colour (not the dark
+     wax red) plus a solid dark outline is what actually stays legible
+     there — the red was nearly invisible against the dark background.
+     A thicker multi-layer outline (not just one offset per corner)
+     keeps the glyphs readable over both the dark background and the
+     lighter vignette near the top of the page. */
+  color: #f0d78c;
+  text-shadow:
+    -1.5px -1.5px 0 var(--ink), 1.5px -1.5px 0 var(--ink),
+    -1.5px 1.5px 0 var(--ink), 1.5px 1.5px 0 var(--ink),
+    -1.5px 0 0 var(--ink), 1.5px 0 0 var(--ink),
+    0 -1.5px 0 var(--ink), 0 1.5px 0 var(--ink),
+    0 2px 5px rgba(0, 0, 0, 0.7);
   white-space: nowrap;
+}
+
+/* corridor A walks downward (heading 180deg), which the label inherits
+   like the feet — fine for position ("ahead" = below), but it would
+   also flip the TEXT upside down, which no colour contrast fixes.
+   Cancel just the 180° so the glyphs stay upright; the small -4deg
+   tilt is unaffected (rotate(176deg) = 180 - 4, applied inside the
+   already-180-rotated parent frame). Corridor B walks upward (heading
+   0deg) so its label is already the right way up with no override. */
+.trail--a .foot-name__text {
+  transform: translate(-50%, calc(-50% + var(--name-lift, -28px))) rotate(176deg);
 }
 
 @keyframes step-fade {
@@ -267,22 +342,22 @@ body::before {
   100% { opacity: 0; }
 }
 
-/* corridor A: diagonal, lower-left to upper-right */
+/* corridor A: walks down the LEFT margin of the parchment ITSELF —
+   centred inside .mappa's own left padding strip, i.e. on the card,
+   in from its edge, before the text's own content box begins. Not out
+   in the dark background outside the card.
+   (100vw - card width) / 2 = the card's left edge (page is centred);
+   + half of the card's own side padding = the middle of that padding
+   strip. */
 @keyframes corridor-a-move {
-  0%   { transform: translate(-8vw, 88vh) rotate(40deg); }
-  100% { transform: translate(108vw, 10vh) rotate(40deg); }
+  0%   { transform: translate(calc((100vw - var(--card-width)) / 2 + var(--card-h-padding) / 2), -10vh) rotate(180deg); }
+  100% { transform: translate(calc((100vw - var(--card-width)) / 2 + var(--card-h-padding) / 2), 110vh) rotate(180deg); }
 }
 
-/* corridor B: diagonal, upper-right to lower-left */
+/* corridor B: same idea, mirrored into the card's right padding strip. */
 @keyframes corridor-b-move {
-  0%   { transform: translate(108vw, 24vh) rotate(260deg); }
-  100% { transform: translate(-8vw, 46vh) rotate(260deg); }
-}
-
-/* corridor C: near-vertical, top to bottom */
-@keyframes corridor-c-move {
-  0%   { transform: translate(35vw, -8vh) rotate(165deg); }
-  100% { transform: translate(62vw, 108vh) rotate(165deg); }
+  0%   { transform: translate(calc(100vw - (100vw - var(--card-width)) / 2 - var(--card-h-padding) / 2), 110vh) rotate(0deg); }
+  100% { transform: translate(calc(100vw - (100vw - var(--card-width)) / 2 - var(--card-h-padding) / 2), -10vh) rotate(0deg); }
 }
 
 /* --stepcount lets app.js shorten the stride for a "s" (piedino) walker
@@ -292,11 +367,8 @@ body::before {
 .trail--a .foot      { animation: corridor-a-move 10s steps(var(--stepcount, 36), jump-none) infinite, step-fade 10s linear infinite; }
 .trail--a .foot-name { animation: corridor-a-move 10s steps(var(--stepcount, 36), jump-none) infinite, step-fade-name 10s linear infinite; }
 
-.trail--b .foot      { animation: corridor-b-move 8s steps(var(--stepcount, 26), jump-none) infinite, step-fade 8s linear infinite; }
-.trail--b .foot-name { animation: corridor-b-move 8s steps(var(--stepcount, 26), jump-none) infinite, step-fade-name 8s linear infinite; }
-
-.trail--c .foot      { animation: corridor-c-move 11s steps(var(--stepcount, 40), jump-none) infinite, step-fade 11s linear infinite; }
-.trail--c .foot-name { animation: corridor-c-move 11s steps(var(--stepcount, 40), jump-none) infinite, step-fade-name 11s linear infinite; }
+.trail--b .foot      { animation: corridor-b-move 11s steps(var(--stepcount, 40), jump-none) infinite, step-fade 11s linear infinite; }
+.trail--b .foot-name { animation: corridor-b-move 11s steps(var(--stepcount, 40), jump-none) infinite, step-fade-name 11s linear infinite; }
 
 /* ==========================================================================
    SEAL — tap to break the wax seal and reveal the content
