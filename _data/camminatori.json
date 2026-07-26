@@ -5,7 +5,7 @@
   { "nome": "Nina", "tipo": "d" },
   
   { "nome": "Lucia", "tipo": "l" },
-  { "nome": "Vincenzo R", "tipo": "l" },
+  { "nome": "Vincenzo", "tipo": "l" },
   { "nome": "Alessandro", "tipo": "l" },
   { "nome": "Vittoria", "tipo": "s" },
 
@@ -15,7 +15,6 @@
   { "nome": "Carmine", "tipo": "l" },
   { "nome": "Samuele", "tipo": "l" },
   { "nome": "Simona", "tipo": "l" },
-  { "nome": "Vincenzo LG", "tipo": "l" },
   { "nome": "Mario", "tipo": "l" },
   { "nome": "Eugenio", "tipo": "l" },
   
