@@ -1,9 +1,13 @@
 # 🗺️ La Mappa del Malandrino — Caccia al Tesoro (versione Jekyll)
 
-Stessa Mappa del Malandrino di prima (pergamena, sigillo di ceralacca che si
-spacca in due, orme che camminano su tutta la pagina), ma ora costruita con
-**Jekyll**: il motore di siti statici che GitHub Pages sa compilare da solo,
-senza bisogno di configurare nessuna build.
+Stessa Mappa del Malandrino di prima (pergamena macchiata, sigillo di
+ceralacca al centro, orme che camminano su tutta la pagina), ma ora
+costruita con **Jekyll**: il motore di siti statici che GitHub Pages sa
+compilare da solo, senza bisogno di configurare nessuna build.
+
+L'intera pergamena è disegnata come una mappa invecchiata piegata a metà
+in verticale: rompendo il sigillo al centro, le due metà si aprono a
+libro rivelando il contenuto sottostante.
 
 ## Perché Jekyll
 
@@ -11,8 +15,8 @@ senza bisogno di configurare nessuna build.
   GitHub lo compila automaticamente. Non serve Node, non serve una GitHub
   Action.
 - **Un solo layout, zero HTML ripetuto**: la pergamena, il sigillo e le orme
-  sono scritti una sola volta (`_layouts/tappa.html`, `_includes/`). Ogni
-  pagina di tappa è solo una manciata di righe di dati.
+  sono scritti una sola volta (`_layouts/tappa-libro.html`, `_includes/`).
+  Ogni pagina di tappa è solo una manciata di righe di dati.
 - **Niente più problema del `file://`**: nella versione precedente il
   contenuto veniva caricato via `fetch()` di un file `.json`, il che
   impediva di aprire le pagine con un doppio click. Ora il contenuto viene
@@ -25,13 +29,15 @@ senza bisogno di configurare nessuna build.
 _config.yml           → configurazione minima del sito
 Gemfile                → per testare in locale con le stesse identiche versioni di GitHub Pages
 _layouts/
-  tappa.html            → l'UNICO template: pergamena + sigillo + orme + contenuto
+  tappa-libro.html      → l'UNICO template: pergamena macchiata + sigillo + orme + contenuto
 _includes/
   foottrail.html         → le orme che camminano su tutta la pagina
-  seal.html               → il sigillo di ceralacca (crepa, due metà, frammenti)
+  libro.html              → il sigillo di ceralacca e le due metà che si aprono a libro
 assets/
-  css/style.css           → stile condiviso (invariato rispetto a prima)
-  js/app.js                → interazione del sigillo (niente più fetch)
+  css/style.css           → stile condiviso di base (pergamena, orme, tipografia, riquadri)
+  css/mappa-libro.css      → macchie/piega/apertura a libro della pergamena
+  js/app.js                → orme che camminano (niente più fetch)
+  js/mappa-libro.js        → interazione del sigillo e apertura a libro
 
 index.html             → HOME — front matter con i dati, il resto lo fa il layout
 tappa1-yf81joVDNqHTmSAbB7WR.html         → Tappa 1
@@ -46,7 +52,7 @@ Ogni pagina è solo **front matter** (i dati tra `---`), niente HTML:
 
 ```yaml
 ---
-layout: tappa
+layout: tappa-libro
 title: "Tappa 1 · Il Verdetto di Azkaban"   # titolo nella scheda del browser
 heading: "🗝️ Il Verdetto di Azkaban"        # titolo grande sulla pergamena
 eyebrow: "Tappa 1"                           # etichetta piccola sopra il titolo

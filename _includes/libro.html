@@ -1,0 +1,23 @@
+<div class="libro-cover" id="libroCover">
+  <div class="libro-face libro-face--left" aria-hidden="true">
+    <span class="libro-face__inner"></span>
+  </div>
+  <div class="libro-face libro-face--right" aria-hidden="true">
+    <span class="libro-face__inner"></span>
+  </div>
+
+  <span class="libro-spine" aria-hidden="true"></span>
+
+  <div class="libro-seal-wrap">
+    <p class="libro-hint">Tocca il sigillo per aprire la mappa</p>
+    <button class="libro-seal" id="libroSeal" type="button" aria-label="Rompi il sigillo e apri la mappa" aria-pressed="false" style="--seal-img: url('{{ '/assets/images/sigillo_ceralacca.png' | relative_url }}');">
+      <span class="libro-seal__glow" aria-hidden="true"></span>
+      <span class="libro-seal__wax" aria-hidden="true"></span>
+      <span class="libro-seal__crack" aria-hidden="true">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 6 L45 26 L59 34 L41 50 L57 64 L44 84 L50 100" stroke="#170b04" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </button>
+  </div>
+</div>

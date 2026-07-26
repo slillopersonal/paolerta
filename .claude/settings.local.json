@@ -3,7 +3,8 @@
     "allow": [
       "PowerShell(docker exec *)",
       "PowerShell(Move-Item *)",
-      "WebFetch(domain:slillopersonal.github.io)"
+      "WebFetch(domain:slillopersonal.github.io)",
+      "WebFetch(domain:codepen.io)"
     ]
   }
 }

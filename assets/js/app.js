@@ -3,51 +3,14 @@
  *
  * Con Jekyll il contenuto di ogni tappa è già presente nell'HTML generato
  * in fase di build (a partire dal front matter della singola pagina), quindi
- * qui non serve più alcun fetch: resta solo l'interazione del sigillo.
+ * qui non serve più alcun fetch: resta solo l'animazione delle orme.
+ * L'interazione del sigillo/apertura a libro è in mappa-libro.js.
  */
 
 (function () {
   "use strict";
 
-  document.addEventListener("DOMContentLoaded", setupSeal);
   document.addEventListener("DOMContentLoaded", setupFoottrail);
-
-  function setupSeal() {
-    var seal = document.getElementById("seal");
-    var content = document.getElementById("content");
-    var sealWrap = document.getElementById("sealWrap");
-    if (!seal || !content) return;
-
-    var reduceMotion = window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    seal.addEventListener("click", function onBreak() {
-      seal.removeEventListener("click", onBreak);
-      seal.setAttribute("aria-pressed", "true");
-
-      if (reduceMotion) {
-        seal.classList.add("is-broken");
-        content.classList.add("is-visible");
-        if (sealWrap) sealWrap.style.display = "none";
-        return;
-      }
-
-      // 1) la ceralacca si crepa sotto pressione
-      seal.classList.add("is-cracking");
-
-      // 2) un attimo dopo si spacca davvero in due e il messaggio appare
-      setTimeout(function () {
-        seal.classList.remove("is-cracking");
-        seal.classList.add("is-broken");
-        content.classList.add("is-visible");
-      }, 220);
-
-      // 3) a detriti posati, il sigillo esce dal flusso
-      setTimeout(function () {
-        if (sealWrap) sealWrap.style.display = "none";
-      }, 1000);
-    });
-  }
 
   function setupFoottrail() {
     var camminatori = window.CAMMINATORI || [];
@@ -71,6 +34,45 @@
     // così da non pescarne mai uno già in uso da un altro corridoio
     var current = {};
 
+    // "sacchetto" condiviso tra i corridoi: un giro casuale di TUTTI i
+    // camminatori, consumato in ordine, senza ripetizioni finché non
+    // sono passati tutti — quando si svuota viene rimescolato da capo.
+    // Pescare a caso ad ogni giro (come prima) poteva far ripetere lo
+    // stesso nome molte volte prima che altri comparissero anche solo
+    // una volta; questo garantisce che ognuno passi prima di rivedersi.
+    var bag = [];
+    var lastOut = null;
+
+    function refillBag() {
+      bag = camminatori.slice();
+      for (var i = bag.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = bag[i]; bag[i] = bag[j]; bag[j] = tmp;
+      }
+      // evita che il primo del nuovo giro sia proprio l'ultimo pescato
+      // dal giro precedente (altrimenti si vedrebbe un mini "doppione"
+      // proprio a cavallo del rimescolamento)
+      if (bag.length > 1 && bag[0].nome === lastOut) {
+        var swapWith = 1 + Math.floor(Math.random() * (bag.length - 1));
+        var t = bag[0]; bag[0] = bag[swapWith]; bag[swapWith] = t;
+      }
+    }
+
+    // pesca il prossimo del sacchetto, saltando chi è già in uso su un
+    // altro corridoio in questo stesso istante (per non mostrare due
+    // volte la stessa persona contemporaneamente); resta comunque nel
+    // sacchetto per essere pescato più avanti, non viene scartato
+    function drawFromBag(exclude) {
+      if (!bag.length) refillBag();
+      var idx = 0;
+      for (var i = 0; i < bag.length; i++) {
+        if (exclude.indexOf(bag[i].nome) === -1) { idx = i; break; }
+      }
+      var pick = bag.splice(idx, 1)[0];
+      lastOut = pick.nome;
+      return pick;
+    }
+
     trails.forEach(function (trail) {
       var id = trail.getAttribute("data-trail");
       var nameEl = trail.querySelector(".foot-name__text");
@@ -92,19 +94,7 @@
         .filter(function (k) { return k !== id; })
         .map(function (k) { return current[k]; });
 
-      var candidates = camminatori.filter(function (c) {
-        return others.indexOf(c.nome) === -1;
-      });
-      if (!candidates.length) candidates = camminatori;
-
-      var previous = current[id];
-      var pick = candidates[Math.floor(Math.random() * candidates.length)];
-      if (candidates.length > 1) {
-        while (pick.nome === previous) {
-          pick = candidates[Math.floor(Math.random() * candidates.length)];
-        }
-      }
-
+      var pick = drawFromBag(others);
       current[id] = pick.nome;
 
       var tipo = pick.tipo || "l";

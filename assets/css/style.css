@@ -371,179 +371,8 @@ body::before {
 .trail--b .foot-name { animation: corridor-b-move 11s steps(var(--stepcount, 40), jump-none) infinite, step-fade-name 11s linear infinite; }
 
 /* ==========================================================================
-   SEAL — tap to break the wax seal and reveal the content
-   ========================================================================== */
-
-.seal-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  padding: 30px 0 10px;
-}
-
-.seal-hint {
-  font-family: var(--font-label);
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
-  opacity: 0.75;
-  text-align: center;
-}
-
-.seal {
-  --size: 112px;
-  width: var(--size);
-  height: var(--size);
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  background: none;
-  padding: 0;
-  transition: transform 0.2s ease;
-  /* ombra unica sull'intero sigillo: se stesse sulle due metà separate
-     (.seal__half) le due drop-shadow si sovrapporrebbero lungo la linea
-     di taglio centrale, creando un alone/riga scura innaturale */
-  filter: drop-shadow(0 5px 7px rgba(40, 26, 10, 0.4));
-}
-
-.seal:hover { transform: scale(1.04); }
-.seal:active { transform: scale(0.96); }
-.seal:focus-visible { outline: 3px solid var(--gold-bright); outline-offset: 6px; }
-
-/* soft magical glow that escapes once the wax cracks open */
-.seal__glow {
-  position: absolute;
-  inset: -30%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 221, 150, 0.9), rgba(255, 221, 150, 0) 65%);
-  opacity: 0;
-  transform: scale(0.4);
-  pointer-events: none;
-}
-
-/* the two wax halves — together they form the intact seal */
-.seal__half {
-  position: absolute;
-  inset: 0;
-  background-image: var(--seal-img);
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.seal__half--left  { clip-path: inset(0 50% 0 0); }
-.seal__half--right { clip-path: inset(0 0 0 50%); }
-
-/* crack line, flashes on the moment of impact, just before the split */
-.seal__crack {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.seal__crack svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 1px rgba(255, 221, 150, 0.6));
-}
-
-/* small wax crumbs that pop off and fall as the seal breaks */
-.seal__crumbs {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.crumb {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  border-radius: 50%;
-  background: var(--wax);
-  box-shadow: inset -1px -1px 1px rgba(0,0,0,0.4);
-  opacity: 0;
-}
-
-/* ---- the sequence, triggered by JS toggling classes on .seal ---- */
-
-.seal.is-cracking {
-  animation: sealShake 0.22s ease;
-}
-
-.seal.is-cracking .seal__crack {
-  animation: crackFlash 0.22s ease forwards;
-}
-
-.seal.is-broken { pointer-events: none; }
-
-.seal.is-broken .seal__crack {
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.seal.is-broken .seal__glow {
-  animation: glowBurst 0.9s ease forwards;
-}
-
-.seal.is-broken .seal__half--left {
-  animation: splitLeft 0.7s cubic-bezier(.25,.7,.4,1) forwards;
-}
-
-.seal.is-broken .seal__half--right {
-  animation: splitRight 0.7s cubic-bezier(.25,.7,.4,1) forwards;
-}
-
-.seal.is-broken .crumb { animation: crumbFall 0.8s ease-out forwards; }
-.seal.is-broken .crumb:nth-child(1) { animation-delay: 0.02s; --tx: -30px; --ty: 46px; --rot: -140deg; }
-.seal.is-broken .crumb:nth-child(2) { animation-delay: 0.05s; --tx: 18px;  --ty: 52px; --rot: 120deg; }
-.seal.is-broken .crumb:nth-child(3) { animation-delay: 0s;    --tx: -44px; --ty: 12px; --rot: -80deg; }
-.seal.is-broken .crumb:nth-child(4) { animation-delay: 0.08s; --tx: 42px;  --ty: 20px; --rot: 100deg; }
-.seal.is-broken .crumb:nth-child(5) { animation-delay: 0.03s; --tx: -10px; --ty: 58px; --rot: -160deg; }
-.seal.is-broken .crumb:nth-child(6) { animation-delay: 0.06s; --tx: 8px;   --ty: 60px; --rot: 150deg; }
-
-@keyframes sealShake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-3px) rotate(-1deg); }
-  50% { transform: translateX(3px) rotate(1deg); }
-  75% { transform: translateX(-2px); }
-}
-
-@keyframes crackFlash {
-  0%   { opacity: 0; }
-  60%  { opacity: 1; }
-  100% { opacity: 1; }
-}
-
-@keyframes glowBurst {
-  0%   { opacity: 0; transform: scale(0.4); }
-  35%  { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.6); }
-}
-
-@keyframes splitLeft {
-  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-  100% { transform: translate(-60%, 30%) rotate(-35deg); opacity: 0; }
-}
-
-@keyframes splitRight {
-  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-  100% { transform: translate(60%, 30%) rotate(35deg); opacity: 0; }
-}
-
-@keyframes crumbFall {
-  0%   { opacity: 1; transform: translate(0, 0) rotate(0deg); }
-  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); }
-}
-
-/* ==========================================================================
-   CONTENT — revealed after the seal breaks
+   CONTENT — revealed after the seal breaks (seal/book-opening styles
+   themselves live in assets/css/mappa-libro.css)
    ========================================================================== */
 
 .content {
@@ -642,26 +471,11 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   .foot,
   .foot-name,
-  .content p,
-  .seal.is-cracking,
-  .seal.is-cracking .seal__crack,
-  .seal.is-broken .seal__glow,
-  .seal.is-broken .seal__half--left,
-  .seal.is-broken .seal__half--right,
-  .seal.is-broken .crumb {
+  .content p {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
 
   .foottrail { display: none; }
-
-  .seal.is-broken .seal__half--left,
-  .seal.is-broken .seal__half--right {
-    opacity: 0 !important;
-  }
-}
-
-@media (max-width: 380px) {
-  .seal { --size: 92px; }
 }
