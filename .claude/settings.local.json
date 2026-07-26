@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(docker exec *)",
+      "PowerShell(Move-Item *)"
+    ]
+  }
+}

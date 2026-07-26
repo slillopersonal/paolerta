@@ -402,6 +402,10 @@ body::before {
   background: none;
   padding: 0;
   transition: transform 0.2s ease;
+  /* ombra unica sull'intero sigillo: se stesse sulle due metà separate
+     (.seal__half) le due drop-shadow si sovrapporrebbero lungo la linea
+     di taglio centrale, creando un alone/riga scura innaturale */
+  filter: drop-shadow(0 5px 7px rgba(40, 26, 10, 0.4));
 }
 
 .seal:hover { transform: scale(1.04); }
@@ -423,22 +427,10 @@ body::before {
 .seal__half {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
-  overflow: hidden;
-  background: radial-gradient(circle at 35% 30%, #a52f3d, var(--wax) 55%, var(--wax-dark) 100%);
-  box-shadow:
-    0 8px 18px rgba(0,0,0,0.45),
-    inset 0 2px 4px rgba(255,255,255,0.25),
-    inset 0 -6px 12px rgba(0,0,0,0.35);
-}
-
-.seal__half svg {
-  position: absolute;
-  width: 54%;
-  height: 54%;
-  top: 23%;
-  left: 23%;
-  color: rgba(255, 231, 190, 0.9);
+  background-image: var(--seal-img);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .seal__half--left  { clip-path: inset(0 50% 0 0); }

@@ -34,9 +34,9 @@ assets/
   js/app.js                → interazione del sigillo (niente più fetch)
 
 index.html             → HOME — front matter con i dati, il resto lo fa il layout
-tappa1.html            → Tappa 1
-tappa2.html            → Tappa 2
-tappa-finale.html      → Tappa finale
+tappa1-yf81joVDNqHTmSAbB7WR.html         → Tappa 1
+tappa2-76v1FjHo3eOApWnmPuJ0.html         → Tappa 2
+tappa-finale-TgXA32wM1ym4qnJe6fHp.html   → Tappa finale
 chiusura.html          → Pagina di chiusura
 ```
 
@@ -69,7 +69,9 @@ Usa `mission` **oppure** `destination`, non servono entrambi sulla stessa tappa.
 
 ## Come aggiungere una tappa intermedia
 
-1. Crea un nuovo file, es. `tappa1b.html`.
+1. Crea un nuovo file, es. `tappa1b-<20 caratteri alfanumerici casuali>.html`
+   (il suffisso casuale serve a rendere l'URL non indovinabile: chi ha il
+   link della tappa precedente non può "saltare avanti" tentando nomi ovvi).
 2. Incollaci un front matter come quello sopra, con i tuoi contenuti.
 3. Fatto. Non c'è nient'altro da toccare: nessun HTML da copiare, nessuno
    script da aggiornare. Il layout condiviso fa tutto il resto.
@@ -116,4 +118,4 @@ se vuoi un URL di anteprima diverso da quello di GitHub.
 ## Ricordati di
 
 Inserire l'indirizzo reale della Piscina Currule nel campo `destination.text`
-di `tappa-finale.html` (ora c'è un segnaposto tra parentesi quadre).
+di `tappa-finale-TgXA32wM1ym4qnJe6fHp.html` (ora c'è un segnaposto tra parentesi quadre).

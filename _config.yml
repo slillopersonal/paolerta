@@ -6,9 +6,12 @@ description: "Caccia al tesoro per l'addio al celibato/nubilato"
 # assets/css/style.css, sovrascrivendo il nostro foglio di stile custom.
 theme: null
 
-# Se pubblichi come Project Page (https://tuonome.github.io/nome-repo/)
-# invece che come sito utente/organizzazione, scommenta e imposta:
-baseurl: "/paolerta"
+# In locale vogliamo l'URL a "/" (baseurl vuoto). In produzione ci pensa
+# già il workflow GitHub Actions (.github/workflows/jekyll.yml), che builda
+# con `--baseurl` preso da actions/configure-pages: quel flag da riga di
+# comando sovrascrive comunque questo valore, quindi qui basta lasciarlo
+# vuoto e non serve toccare nulla quando si pubblica.
+baseurl: ""
 
 exclude:
   - README.md
